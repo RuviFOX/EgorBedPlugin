@@ -10,36 +10,78 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Скачиваем код из вашего репозитория
+    # 1. Скачиваем ваш код из репозитория
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2. Устанавливаем Java 25
+    # 2. Настраиваем Java 25
     - name: Set up JDK 25
       uses: actions/setup-java@v4
       with:
         java-version: '25'
         distribution: 'temurin'
+        cache: 'maven'
 
-    # 3. Скачиваем рабочую библиотеку (Paper API полностью совместим со Spigot)
-    - name: Download Spigot-Compatible API
+    # 3. Автоматически компилируем и собираем плагин через встроенный Maven
+    - name: Build with Maven Compiler
       run: |
-        mkdir -p lib
-        curl -L -o lib/spigot-api.jar "https://papermc.io"
+        # Создаем временный файл настроек проекта для Maven
+        cat << 'EOF' > pom.xml
+        <project xmlns="http://apache.org" xmlns:xsi="http://w3.org"
+          xsi:schemaLocation="http://apache.org http://apache.org">
+          <modelVersion>4.0.0</modelVersion>
+          <groupId>ru.yourname</groupId>
+          <artifactId>egorbed</artifactId>
+          <version>1.0</version>
+          <properties>
+            <maven.compiler.source>25</maven.compiler.source>
+            <maven.compiler.target>25</maven.compiler.target>
+            <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+          </properties>
+          <repositories>
+            <repository>
+              <id>spigotmc-repo</id>
+              <url>https://spigotmc.org</url>
+            </repository>
+          </repositories>
+          <dependencies>
+            <dependency>
+              <groupId>org.spigotmc</groupId>
+              <artifactId>spigot-api</artifactId>
+              <version>1.21-R0.1-SNAPSHOT</version>
+              <scope>provided</scope>
+            </dependency>
+          </dependencies>
+          <build>
+            <sourceDirectory>src</sourceDirectory>
+            <resources>
+              <resource>
+                <directory>.</directory>
+                <includes>
+                  <include>plugin.yml</include>
+                </includes>
+              </resource>
+            </resources>
+            <plugins>
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                  <finalName>EgorBed</finalName>
+                </configuration>
+              </plugin>
+            </plugins>
+          </build>
+        </project>
+        EOF
+        
+        # Запускаем официальную сборку
+        mvn clean package
 
-    # 4. Компилируем код плагина
-    - name: Compile Java Code
-      run: |
-        javac -encoding UTF-8 -cp "lib/spigot-api.jar" src/ru/yourname/egorbed/Main.java
-
-    # 5. Упаковываем всё в готовый .jar файл
-    - name: Build JAR Artifact
-      run: |
-        jar cfM EgorBed.jar plugin.yml -C src ru
-
-    # 6. Сохраняем готовый файл для скачивания
+    # 4. Сохраняем готовый чистый .jar файл для скачивания
     - name: Upload Finished Plugin
       uses: actions/upload-artifact@v4
       with:
         name: EgorBed-Plugin
-        path: EgorBed.jar
+        path: target/EgorBed.jar

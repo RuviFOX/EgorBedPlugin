@@ -1,0 +1,45 @@
+name: Build Minecraft Spigot Plugin
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Скачиваем код из репозитория
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Устанавливаем Java 25
+    - name: Set up JDK 25
+      uses: actions/setup-java@v4
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+
+    # 3. Скачиваем библиотеку Spigot API для компиляции
+    - name: Download Spigot API
+      run: |
+        mkdir -p lib
+        curl -L -o lib/spigot-api.jar "https://spigotmc.org"
+
+    # 4. Компилируем код плагина
+    - name: Compile Java Code
+      run: |
+        javac -encoding UTF-8 -cp "lib/spigot-api.jar" src/ru/yourname/egorbed/Main.java
+
+    # 5. Упаковываем всё в .jar файл
+    - name: Build JAR Artifact
+      run: |
+        jar cfM EgorBed.jar plugin.yml -C src ru
+
+    # 6. Сохраняем готовый файл для скачивания
+    - name: Upload Finished Plugin
+      uses: actions/upload-artifact@v4
+      with:
+        name: EgorBed-Spigot-Plugin
+        path: EgorBed.jar

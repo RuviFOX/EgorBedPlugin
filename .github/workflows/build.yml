@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Скачиваем код из репозитория
+    # 1. Скачиваем код из вашего репозитория
     - name: Checkout repository
       uses: actions/checkout@v4
 
@@ -21,18 +21,18 @@ jobs:
         java-version: '25'
         distribution: 'temurin'
 
-    # 3. Скачиваем библиотеку Spigot API для компиляции
-    - name: Download Spigot API
+    # 3. Скачиваем рабочую библиотеку (Paper API полностью совместим со Spigot)
+    - name: Download Spigot-Compatible API
       run: |
         mkdir -p lib
-        curl -L -o lib/spigot-api.jar "https://spigotmc.org"
+        curl -L -o lib/spigot-api.jar "https://papermc.io"
 
     # 4. Компилируем код плагина
     - name: Compile Java Code
       run: |
         javac -encoding UTF-8 -cp "lib/spigot-api.jar" src/ru/yourname/egorbed/Main.java
 
-    # 5. Упаковываем всё в .jar файл
+    # 5. Упаковываем всё в готовый .jar файл
     - name: Build JAR Artifact
       run: |
         jar cfM EgorBed.jar plugin.yml -C src ru
@@ -41,5 +41,5 @@ jobs:
     - name: Upload Finished Plugin
       uses: actions/upload-artifact@v4
       with:
-        name: EgorBed-Spigot-Plugin
+        name: EgorBed-Plugin
         path: EgorBed.jar

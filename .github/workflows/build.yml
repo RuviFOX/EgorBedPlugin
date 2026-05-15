@@ -14,13 +14,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2. Настраиваем Java 25
+    # 2. Настраиваем Java 25 (без конфликтующего кэша)
     - name: Set up JDK 25
       uses: actions/setup-java@v4
       with:
         java-version: '25'
         distribution: 'temurin'
-        cache: 'maven'
 
     # 3. Автоматически компилируем и собираем плагин через встроенный Maven
     - name: Build with Maven Compiler

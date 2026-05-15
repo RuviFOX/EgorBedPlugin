@@ -14,7 +14,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2. Настраиваем Java 25 (без конфликтующего кэша)
+    # 2. Настраиваем Java 25
     - name: Set up JDK 25
       uses: actions/setup-java@v4
       with:
@@ -24,10 +24,10 @@ jobs:
     # 3. Автоматически компилируем и собираем плагин через встроенный Maven
     - name: Build with Maven Compiler
       run: |
-        # Создаем временный файл настроек проекта для Maven
+        # Создаем временный файл настроек проекта для Maven с правильным репозиторием
         cat << 'EOF' > pom.xml
-        <project xmlns="http://apache.org" xmlns:xsi="http://w3.org"
-          xsi:schemaLocation="http://apache.org http://apache.org">
+        <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://apache.org">
           <modelVersion>4.0.0</modelVersion>
           <groupId>ru.yourname</groupId>
           <artifactId>egorbed</artifactId>
@@ -38,16 +38,18 @@ jobs:
             <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
           </properties>
           <repositories>
+            <!-- Официальный публичный репозиторий SpigotMC -->
             <repository>
-              <id>spigotmc-repo</id>
-              <url>https://spigotmc.org</url>
+              <id>spigotmc-public</id>
+              <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
             </repository>
           </repositories>
           <dependencies>
+            <!-- Стабильное API, совместимое с Spigot/Paper -->
             <dependency>
               <groupId>org.spigotmc</groupId>
               <artifactId>spigot-api</artifactId>
-              <version>1.21-R0.1-SNAPSHOT</version>
+              <version>1.21.1-R0.1-SNAPSHOT</version>
               <scope>provided</scope>
             </dependency>
           </dependencies>
